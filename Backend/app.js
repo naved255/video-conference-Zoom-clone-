@@ -1,17 +1,23 @@
-import express, { urlencoded } from 'express'
+import express from 'express'
 import mongoose from 'mongoose';
 import userModel from './models/userModel.js';
 import passport from 'passport';
 import LocalStrategy from 'passport-local';
 import session from './session.js';
-import {isLoggedIn} from './middlewares.js'
+import { isLoggedIn } from './middlewares.js'
+import cors from 'cors'
+import bodyParser from 'body-parser'
 
 const port = 3000;
 const app = express();
 
 app.use(session)
-
-app.use(express.urlencoded({extended:true}));
+app.use(cors({
+    credentials:true,
+    origin: ["http://localhost:5173"]
+}))
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
 
 app.use(passport.initialize())
 app.use(passport.session())
@@ -33,43 +39,54 @@ app.get('/', (req, res) => {
 
 app.post('/user/signup', async (req, res) => {
     try {
-        let {name, username, password} = req.body;
-        let user = new userModel({name:name, username:username});
+        console.log(req.body.form);
+        let { name, username, password } = req.body.form;
+
+        let user = new userModel({ name: name, username: username });
         let registered = await userModel.register(user, password);
         console.log("user registered");
         req.logIn(registered, (err) => {
-            if(err) console.log(err);
-            res.status(200).json({status:true, message:"User registered successfully"});
+            if (err) console.log(err);
+            res.status(200).json({ status: true, message: "User registered successfully" });
         })
     } catch (error) {
-        console.log("error in db: ",error);
-        res.status(500).json({status:false, message:"Something went wrong in db"});
+        console.log("error in db: ", error);
+        res.status(500).json({ status: false, message: "Something went wrong in db" });
     }
 })
 
-app.get("/user/logout", isLoggedIn, async (req, res) => {
+app.get('/isAuth', isLoggedIn, async (req, res) => {
     try {
-        req.logOut((err) => {
-            if(err) {
-                console.log(err);
-                res.status(500).json({status:false, message:"failed to logout"});
-            }
-
-            res.status(200).json({status:true, message:"user logout successfully"});
-        })
+        res.status(200).json({status:true, message:"user exist and logged in", username:req.user?.username});
     } catch (error) {
         console.log(error);
-        res.status(500).json({status:false, message:'user logout failed'});
+        res.status(500).json({status:false, message:"user not exist or something went wrong"});
     }
 })
 
-app.post("/user/login", passport.authenticate('local'),async (req, res) => {
+app.get("/user/logout", isLoggedIn, (req, res) => {
+    req.logout((err) => {
+        if (err) {
+            console.error(err);
+            return res
+                .status(500)
+                .json({ status: false, message: "failed to logout" });
+        }
+
+        return res
+            .status(200)
+            .json({ status: true, message: "user logout successfully" });
+    });
+});
+
+
+app.post("/user/login", passport.authenticate('local', { failureMessage: true }), async (req, res) => {
     try {
         console.log(req.user);
-        res.status(200).json({status:true, message:"user is logged in", username:req.user?.username});
+        res.status(200).json({ status: true, message: "user is logged in", username: req.user?.username });
     } catch (error) {
         console.log(error);
-        res.status(500).json({status:false, message:"something went wrong in db"});
+        res.status(500).json({ status: false, message: "something went wrong in db" });
     }
 })
 

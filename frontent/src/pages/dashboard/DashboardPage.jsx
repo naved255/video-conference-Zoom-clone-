@@ -1,11 +1,15 @@
-import React from 'react'
+import React, {useContext} from 'react'
 import Navbar from '../Navbar'
 import Hero from './Hero'
 import RightImage from './RightImage'
 import { Route, Routes } from 'react-router-dom'
 import History from './History'
+import { GeneralContext } from '../../GeneralProvider'
+
 
 const DashboardPage = () => {
+    
+    const {username} = useContext(GeneralContext);
 
     const links = [
         {
@@ -17,12 +21,13 @@ const DashboardPage = () => {
         {
             path: "",
             title: "Log Out",
+            logout:true
 
         }
     ]
     return (
         <div>
-            <Navbar color="black" links={links} />
+            <Navbar title={`Welcome ${username}`} color="black" links={links} />
             <Routes>
                 <Route path='/' element={<div className='grid grid-cols-2 content-center'>
                     <div className='col-span-1 px-2.5 py-10 content-center'>

@@ -1,11 +1,34 @@
-import React from 'react'
+import React, { useContext, useEffect } from 'react'
 import Hero from './Hero'
 import ImageSection from './ImageSection'
 import Navbar from '../Navbar'
+import { GeneralContext } from '../../GeneralProvider'
+import axios from 'axios'
+import API from '../../../config/api'
 
 const HomePage = () => {
 
-    const links = [
+    const {username, setusername} = useContext(GeneralContext);
+
+    useEffect(() => {
+        async function isAuth() {
+            let res = await axios.get(`${API}/isAuth`, {withCredentials:true});
+            if(!res.data.status) {
+                console.log("unAuthories");
+                return;
+            }
+
+            setusername(res.data.username);
+
+        }
+
+        isAuth();
+    }, [username])
+
+
+
+    let links;
+    username === null? links = [
         {
             path:"/",
             title: "Join as Guest"
@@ -18,9 +41,19 @@ const HomePage = () => {
             path:"/auth",
             title:"Login"
         }
+    ]:links = [
+        {
+            path:"/",
+            title: "Join as Guest"
+        },
+        {
+            path:"/dashboard",
+            title:"Dashboard"
+        }
     ]
+
   return (
-    <div class="bg-[url('/earth.webp')] bg-cover bg-top h-screen">
+    <div className="bg-[url('/earth.webp')] bg-cover bg-top h-screen">
         <div className='absolute w-full h-full bg-black opacity-50'></div>
         <Navbar title={"Video Conference"} links={links}/>
         <div className='absolute w-full h-full grid max-w-390 content-center grid-cols-2'>
