@@ -11,11 +11,11 @@ const HomePage = () => {
             title: "Join as Guest"
         },
         {
-            path:"/",
+            path:"/auth",
             title:"Register"
         },
         {
-            path:"/",
+            path:"/auth",
             title:"Login"
         }
     ]
@@ -25,7 +25,7 @@ const HomePage = () => {
         <Navbar title={"Video Conference"} links={links}/>
         <div className='absolute w-full h-full grid max-w-390 content-center grid-cols-2'>
             
-            <div className='col-span-1 content-center px-10'>
+            <div className='col-span-1 px-10 content-center'>
                 <Hero/>
             </div>
             <div className='col-span-1 flex justify-end px-5'>
