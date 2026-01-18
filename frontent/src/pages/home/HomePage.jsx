@@ -30,7 +30,7 @@ const HomePage = () => {
     let links;
     username === null? links = [
         {
-            path:"/",
+            path:"/meetingLink",
             title: "Join as Guest"
         },
         {
@@ -43,7 +43,7 @@ const HomePage = () => {
         }
     ]:links = [
         {
-            path:"/",
+            path:"/meetingLink",
             title: "Join as Guest"
         },
         {

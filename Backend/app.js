@@ -7,9 +7,16 @@ import session from './session.js';
 import { isLoggedIn } from './middlewares.js'
 import cors from 'cors'
 import bodyParser from 'body-parser'
+import {createServer} from "node:http"
+import { Server } from 'socket.io';
+import createSocketConnection from './socketManager.js'
 
-const port = 3000;
+const port = 3000;  
 const app = express();
+
+let server = createServer(app);
+let io = createSocketConnection(server);
+
 
 app.use(session)
 app.use(cors({
@@ -41,6 +48,13 @@ app.post('/user/signup', async (req, res) => {
     try {
         console.log(req.body.form);
         let { name, username, password } = req.body.form;
+
+
+        let findUser = await userModel.findOne({username:username});
+        if(findUser) {
+            console.log('user exist');
+            return res.status(402).json({status:false, message:"user already exist"});
+        }
 
         let user = new userModel({ name: name, username: username });
         let registered = await userModel.register(user, password);
@@ -90,6 +104,6 @@ app.post("/user/login", passport.authenticate('local', { failureMessage: true })
     }
 })
 
-app.listen(port, () => {
+server.listen(port, () => {
     console.log(`backend running on port ${port}\nClick http://localhost:3000`);
 })
