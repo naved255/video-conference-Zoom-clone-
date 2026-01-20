@@ -1,7 +1,7 @@
 import React, {useContext} from 'react'
 import { useNavigate } from 'react-router-dom'
 import { GeneralContext } from '../../GeneralProvider';
-import { useParams } from 'react-router-dom';
+
 
 
 const Hero = () => {

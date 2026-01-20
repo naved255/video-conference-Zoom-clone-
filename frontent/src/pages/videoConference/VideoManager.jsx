@@ -16,11 +16,12 @@ import ChatIcon from "@mui/icons-material/Chat";
 import { useNavigate } from 'react-router-dom'
 import { useParams } from "react-router-dom";
 import axios from 'axios'
+import API from '../../../config/api'
 
 
 
 
-const SERVER_URL = "http://localhost:3000";
+const SERVER_URL = `${API}`;
 
 const peerConfig = {
   iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
@@ -54,7 +55,7 @@ const VideoManager = () => {
   const postHistory = async () => {
     try {
       console.log("posthistory");
-      let res = await axios.post('http://localhost:3000/user/history', { meetingCode: meeting_code }, { withCredentials: true })
+      let res = await axios.post(`${API}/user/meeting/history`, { meetingCode: meeting_code }, { withCredentials: true })
       console.log(res.data.status);
       console.log("postHistory2");
     } catch (error) {

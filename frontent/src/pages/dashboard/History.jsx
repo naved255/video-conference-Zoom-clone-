@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import axios from 'axios'
+import API from '../../../config/api'
 
 const History = () => {
 
@@ -7,7 +8,7 @@ const History = () => {
 
   useEffect(() => {
     async function getHistory() {
-      let res = await axios.get('http://localhost:3000/user/history', { withCredentials: true });
+      let res = await axios.get(`${API}/user/meeting/history`, { withCredentials: true });
       
       if (res.data?.status) {
         sethistory(res.data.data);
@@ -22,8 +23,8 @@ const History = () => {
     <div className='mt-14'>
       {
         history.length > 0 ? (
-          history.map(item => (
-            <div className='flex w-full justify-around px-2 py-1 items-center'>
+          history.map((item, idx) => (
+            <div key={idx} className='flex w-full justify-around px-2 py-1 items-center'>
               <p>{item.meetingCode}</p>
               <p>{item.date}</p>
             </div>
