@@ -5,14 +5,23 @@ import AuthComponent from './AuthComponent.jsx'
 
 const AuthPage = () => {
   return (
-    <div className='grid grid-cols-3'>
-        <div className='col-span-2'>
-            <SideImage/>
+    <div className="min-h-screen flex flex-col">
+      {/* Navbar */}
+      <Navbar />
+
+      {/* Main content */}
+      <div className="flex flex-col h-screen md:flex-row min-h-[calc(100vh-64px)]">
+
+        {/* Side Image - hidden on small screens */}
+        <div className="hidden md:block md:w-2/3">
+          <SideImage />
         </div>
-        <div className='col-span-1'>
-            <AuthComponent/>
+
+        {/* Auth Form */}
+        <div className="w-full md:w-1/3 overflow-y-auto flex items-center justify-center p-4">
+          <AuthComponent />
         </div>
-        
+      </div>
     </div>
   )
 }

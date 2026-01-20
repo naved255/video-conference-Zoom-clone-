@@ -453,146 +453,166 @@ const VideoManager = () => {
     setunreadCount(0);
   };
 
-  return (
-    <div>
-      {askForUsername ? (
-        <div>
-          <h2>Enter Lobby</h2>
+ return (
+  <div className="w-full h-screen">
+    {askForUsername ? (
+      <div className="min-h-screen flex flex-col items-center justify-center px-4">
+        <h2 className="text-2xl font-bold mb-4">Enter Lobby</h2>
 
-          <form onSubmit={connect}>
-            <TextField
-              label="Username"
-              required
-              value={meetingusername}
-              onChange={(e) => setmeetingusername(e.target.value)}
+        <form
+          onSubmit={connect}
+          className="flex flex-col sm:flex-row gap-3 w-full max-w-md"
+        >
+          <TextField
+            label="Username"
+            required
+            fullWidth
+            value={meetingusername}
+            onChange={(e) => setmeetingusername(e.target.value)}
+          />
+
+          <Button type="submit" variant="contained">
+            Connect
+          </Button>
+        </form>
+
+        <video
+          ref={localVideoRef}
+          autoPlay
+          muted
+          playsInline
+          className="mt-4 w-full max-w-sm rounded-md"
+        />
+      </div>
+    ) : (
+      <div className="w-full min-h-screen bg-blue-950 relative overflow-hidden">
+        {/* Local Video */}
+        <video
+          ref={localVideoRef}
+          autoPlay
+          muted
+          playsInline
+          className={`
+            fixed bottom-20 right-4 sm:right-6
+            w-32 sm:w-48 md:w-64
+            rounded-md shadow-lg
+            transform transition-transform duration-300
+            ${showMessageBar ? '-translate-x-80 sm:-translate-x-96' : 'translate-x-0'}
+          `}
+        />
+
+        {/* Joined Users */}
+        <h3 className="text-white font-bold text-lg sm:text-xl px-4 py-2">
+          People joined
+        </h3>
+
+        <div className="flex flex-wrap gap-3 px-4 pb-32">
+          {videos.map((v) => (
+            <video
+              key={v.socketId}
+              autoPlay
+              playsInline
+              ref={(ref) => {
+                if (ref) ref.srcObject = v.stream;
+              }}
+              className="rounded-md w-full sm:w-64 md:w-72 lg:w-80"
             />
-
-            <Button
-              type="submit"
-              variant="contained"
-            >
-              Connect
-            </Button>
-          </form>
-
-
-          <video
-
-            ref={localVideoRef}
-            autoPlay
-            muted
-            playsInline
-            style={{ width: 300, marginTop: 10 }}
-          />
-
-
+          ))}
         </div>
-      ) : (
-        <div className="w-full h-screen bg-blue-950">
 
-          <video
-            className={`absolute bottom-14 right-10 rounded-md
-    transform transition-transform duration-400
-    ${showMessageBar ? '-translate-x-100' : 'translate-x-0'}`}
-            ref={localVideoRef}
-            autoPlay
-            muted
-            playsInline
-            width={300}
-          />
+        {/* Chat Sidebar */}
+        <div
+          className={`
+            fixed top-0 right-0 h-full
+            w-full sm:w-80
+            bg-gray-100
+            transform transition-transform duration-300
+            ${showMessageBar ? 'translate-x-0' : 'translate-x-full'}
+            overflow-y-auto z-40
+          `}
+        >
+          <h1 className="font-bold text-xl px-4 py-3">Chat window</h1>
 
-
-          <h3 className="text-white font-bold text-xl px-2 py-1">People joined</h3>
-          <div className="flex flex-wrap gap-2.5 py-1.5 px-2">
-            {videos.map((v) => (
-              <video
-                className="rounded-md"
-                key={v.socketId}
-                autoPlay
-                playsInline
-                ref={(ref) => {
-                  if (ref) ref.srcObject = v.stream;
-                }}
-                width={300}
-              />
+          <div className="h-[75vh] bg-white overflow-y-auto px-3 py-2">
+            {messages.map((msg, idx) => (
+              <div
+                key={idx}
+                className={`my-2 p-2 rounded-md max-w-[85%]
+                  ${
+                    msg.sender === meetingusername
+                      ? 'bg-blue-500 text-white ml-auto'
+                      : 'bg-gray-200 text-black mr-auto'
+                  }`}
+              >
+                <p className="text-xs font-bold">{msg.sender}</p>
+                <p className="text-sm break-words">{msg.data}</p>
+              </div>
             ))}
           </div>
-          <div className="fixed bottom-14 w-full flex justify-center items-center">
 
-            <div className={`fixed h-screen w-80 bg-gray-100   transform transition-transform duration-300 ${showMessageBar ? 'translate-x-0' : 'translate-x-full'}
- overflow-y-auto top-0 right-0 py-3 px-4`}>
-              <h1 className="font-bold text-xl px-2 py-1">Chat window</h1>
-              <div className="h-[80vh] bg-white overflow-y-auto px-2 py-1">
-                {messages.map((msg, idx) => (
-                  <div
-                    key={idx}
-                    className={`my-1 p-2 rounded-md max-w-[80%]
-        ${msg.sender === meetingusername
-                        ? "bg-blue-500 text-white ml-auto"
-                        : "bg-gray-200 text-black mr-auto"
-                      }`}
-                  >
-                    <p className="text-xs font-bold">{msg.sender}</p>
-                    <p className="text-sm">{msg.data}</p>
-                  </div>
-                ))}
-              </div>
-
-              <form className="flex mt-2 gap-2.5 px-1 py-1 justify-center items-center" onSubmit={sendChatMessage}>
-
-                <TextField
-                  label="Enter your chat..."
-                  value={chat}
-                  onChange={(e) => setchat(e.target.value)}
-                />
-                <button className="bg-blue-500 px-2 py-1 text-center rounded-md" type="submit">send</button>
-              </form>
-            </div>
-
-            <Stack direction="row" spacing={2}>
-              {/* Mute / Unmute */}
-              <IconButton
-                color={isMuted ? "secondary" : "primary"}
-                onClick={onToggleMute}
-
-              >
-                {isMuted ? <MicOffIcon /> : <MicIcon />}
-              </IconButton>
-
-              <IconButton
-                color={isCameraOn ? "primary" : "secondary"}
-                onClick={onToggleCamera}
-              >
-                {isCameraOn ? <VideocamIcon /> : <VideocamOffIcon />}
-              </IconButton>
-
-              {/* Screen Share / Stop Sharing */}
-              <IconButton
-                color={isScreenSharing ? "secondary" : "primary"}
-                onClick={onToggleScreenShare}
-              >
-                {isScreenSharing ? <StopScreenShareIcon /> : <ScreenShareIcon />}
-              </IconButton>
-
-              {/* End Call */}
-              <IconButton
-                color="error"
-                onClick={onEndCall}
-              >
-                <CallEndIcon />
-              </IconButton>
-
-              <IconButton onClick={onMessageBar} color="primary">
-                <Badge badgeContent={unreadCount} color="error">
-                  <ChatIcon />
-                </Badge>
-              </IconButton>
-            </Stack>
-          </div>
+          <form
+            onSubmit={sendChatMessage}
+            className="flex gap-2 px-3 py-2 items-center"
+          >
+            <TextField
+              label="Enter your chat..."
+              fullWidth
+              value={chat}
+              onChange={(e) => setchat(e.target.value)}
+            />
+            <button
+              type="submit"
+              className="bg-blue-500 text-white px-3 py-2 rounded-md"
+            >
+              Send
+            </button>
+          </form>
         </div>
-      )}
-    </div>
-  );
+
+        {/* Controls */}
+        <div className="fixed bottom-4 w-full flex justify-center z-50">
+          <Stack
+            direction="row"
+            spacing={1}
+            className="bg-white/90 px-3 py-2 rounded-full"
+          >
+            <IconButton
+              color={isMuted ? 'secondary' : 'primary'}
+              onClick={onToggleMute}
+            >
+              {isMuted ? <MicOffIcon /> : <MicIcon />}
+            </IconButton>
+
+            <IconButton
+              color={isCameraOn ? 'primary' : 'secondary'}
+              onClick={onToggleCamera}
+            >
+              {isCameraOn ? <VideocamIcon /> : <VideocamOffIcon />}
+            </IconButton>
+
+            <IconButton
+              color={isScreenSharing ? 'secondary' : 'primary'}
+              onClick={onToggleScreenShare}
+            >
+              {isScreenSharing ? <StopScreenShareIcon /> : <ScreenShareIcon />}
+            </IconButton>
+
+            <IconButton color="error" onClick={onEndCall}>
+              <CallEndIcon />
+            </IconButton>
+
+            <IconButton onClick={onMessageBar} color="primary">
+              <Badge badgeContent={unreadCount} color="error">
+                <ChatIcon />
+              </Badge>
+            </IconButton>
+          </Stack>
+        </div>
+      </div>
+    )}
+  </div>
+);
+
 };
 
 export default VideoManager;

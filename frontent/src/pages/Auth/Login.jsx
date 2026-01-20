@@ -26,7 +26,6 @@ const Login = () => {
     ))
   }
 
-
   async function handleSubmit(e) {
     try {
       e.preventDefault();
@@ -41,7 +40,6 @@ const Login = () => {
       navigate("/dashboard");
 
     } catch (error) {
-      setsubmitting(false);
       console.log(error);
     } finally {
       setsubmitting(false);
@@ -49,36 +47,36 @@ const Login = () => {
   }
 
   return (
-    <div className=" flex items-center justify-center py-4 px-4">
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-8">
+    <div className="flex items-center justify-center py-6 px-4 min-h-[calc(100vh-64px)]">
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-lg p-6 sm:p-8">
 
         {/* Heading */}
-        <h2 className="text-2xl font-semibold text-center text-gray-800">
+        <h2 className="text-2xl sm:text-3xl font-semibold text-center text-gray-800">
           Login to your account
         </h2>
-        <p className="text-sm text-gray-500 text-center mt-2">
-          login to start video conference
+        <p className="text-sm sm:text-base text-gray-500 text-center mt-2">
+          Login to start your video conference
         </p>
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="mt-6 space-y-5">
 
-
-          {/* Email */}
+          {/* Username */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Email
             </label>
             <input
               required
-              type="username"
+              type="text"
               name="username"
-              id="email"
+              id="username"
               onChange={handleChange}
-              value={form.name}
+              value={form.username}  // fixed bug here
               placeholder="you@example.com"
               className="w-full px-4 py-2 border rounded-lg text-sm
-                     focus:outline-none focus:ring-2 focus:ring-blue-500"
+                     focus:outline-none focus:ring-2 focus:ring-blue-500
+                     focus:border-blue-500 transition duration-150"
             />
           </div>
 
@@ -96,7 +94,8 @@ const Login = () => {
               value={form.password}
               placeholder="••••••••"
               className="w-full px-4 py-2 border rounded-lg text-sm
-                     focus:outline-none focus:ring-2 focus:ring-blue-500"
+                     focus:outline-none focus:ring-2 focus:ring-blue-500
+                     focus:border-blue-500 transition duration-150"
             />
           </div>
 
@@ -104,16 +103,16 @@ const Login = () => {
           <button
             disabled={submitting}
             type="submit"
-            className="w-full py-2.5 bg-blue-600 text-white font-medium
-                   rounded-lg hover:bg-blue-700 transition duration-200"
+            className={`w-full py-2.5 bg-blue-600 text-white font-medium
+                   rounded-lg hover:bg-blue-700 transition duration-200
+                   ${submitting ? 'opacity-50 cursor-not-allowed' : ''}`}
           >
-            Login
+            {submitting ? "Logging in..." : "Login"}
           </button>
         </form>
 
       </div>
     </div>
-
   )
 }
 
