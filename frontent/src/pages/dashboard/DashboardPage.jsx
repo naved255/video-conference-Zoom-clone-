@@ -1,15 +1,33 @@
-import React, {useContext} from 'react'
+import React, { useContext, useEffect } from 'react'
 import Navbar from '../Navbar'
 import Hero from './Hero'
 import RightImage from './RightImage'
 import { Route, Routes } from 'react-router-dom'
 import History from './History'
 import { GeneralContext } from '../../GeneralProvider'
+import axios from 'axios'
+import API from '../../../config/api'
 
 
 const DashboardPage = () => {
-    
-    const {username} = useContext(GeneralContext);
+
+    const { username, setusername } = useContext(GeneralContext);
+
+    useEffect(() => {
+        async function isAuth() {
+            let res = await axios.get(`${API}/isAuth`, { withCredentials: true });
+            if (!res.data.status) {
+                console.log("unAuthories");
+                return;
+            }
+
+            setusername(res.data.username);
+
+        }
+
+        isAuth();
+    }, [username])
+
 
     const links = [
         {
@@ -21,7 +39,7 @@ const DashboardPage = () => {
         {
             path: "",
             title: "Log Out",
-            logout:true
+            logout: true
 
         }
     ]
@@ -37,7 +55,7 @@ const DashboardPage = () => {
                         <RightImage />
                     </div>
                 </div>} />
-                <Route path='/history' element={<History/>}/>
+                <Route path='/history' element={<History />} />
             </Routes>
         </div>
     )

@@ -5,6 +5,7 @@ import AuthPage from './pages/Auth/AuthPage'
 import DashboardPage from './pages/dashboard/dashboardPage'
 import { GeneralProvider } from './GeneralProvider'
 import VideoManager from './pages/videoConference/VideoManager'
+import MeetingCode from './pages/MeetingCode'
 
 function App() {
 
@@ -16,6 +17,7 @@ function App() {
           <Routes>
             <Route path='/' element={<HomePage />} />
             <Route path='/auth' element={<AuthPage />} />
+            <Route path='/meet' element={<MeetingCode/>}/>
             <Route path='/dashboard/*' element={<DashboardPage />} />
             <Route path='/:meeting_code' element={<VideoManager/>}/>
           </Routes>

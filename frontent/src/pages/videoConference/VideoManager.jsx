@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect, useContext } from "react";
 import { io } from "socket.io-client";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
@@ -13,6 +13,10 @@ import VideocamIcon from '@mui/icons-material/Videocam';
 import VideocamOffIcon from '@mui/icons-material/VideocamOff';
 import Badge from "@mui/material/Badge";
 import ChatIcon from "@mui/icons-material/Chat";
+import { useNavigate } from 'react-router-dom'
+import { useParams } from "react-router-dom";
+import axios from 'axios'
+
 
 
 
@@ -22,21 +26,56 @@ const peerConfig = {
   iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
 };
 
+
+
 const VideoManager = () => {
   const socketRef = useRef(null);
   const socketIdRef = useRef(null);
-  const [unreadCount, setunreadCount] = useState(3)
+  const [unreadCount, setunreadCount] = useState(0)
   const localVideoRef = useRef(null);
   const peerConnections = useRef({});
   const [isMuted, setisMuted] = useState(false);
   const [isScreenSharing, setisScreenSharing] = useState(false);
   const [videos, setVideos] = useState([]);
   const [isCameraOn, setisCameraOn] = useState(true);
-  const [username, setUsername] = useState("");
+  const [meetingusername, setmeetingusername] = useState("");
   const [askForUsername, setAskForUsername] = useState(true);
   const [showMessageBar, setshowMessageBar] = useState(false);
   const screenStreamRef = useRef(null);
   const videoSenderMapRef = useRef({});
+  const [chat, setchat] = useState('');
+  const [messages, setMessages] = useState([]);
+
+
+  const navigate = useNavigate()
+
+    const {meeting_code} = useParams();
+
+  const postHistory = async () => {
+    try {
+      console.log("posthistory");
+      let res = await axios.post('http://localhost:3000/user/history', { meetingCode: meeting_code }, { withCredentials: true })
+      console.log(res.data.status);
+      console.log("postHistory2");
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+
+  useEffect(() => {
+    return () => {
+      if (socketRef.current) {
+        socketRef.current.off("chat-message", handleChatMessage);
+        socketRef.current.off("user-joined", handleUserJoined);
+        socketRef.current.off("user-left", handleUserLeft);
+        socketRef.current.off("signal", handleSignal);
+        socketRef.current.disconnect();
+        socketRef.current = null;
+      }
+    };
+  }, []);
+
 
 
   /* -------------------- BLACK & SILENCE -------------------- */
@@ -47,6 +86,8 @@ const VideoManager = () => {
     oscillator.start();
     return Object.assign(dst.stream.getAudioTracks()[0], { enabled: false });
   };
+
+
 
   const black = ({ width = 640, height = 480 } = {}) => {
     const canvas = Object.assign(document.createElement("canvas"), {
@@ -106,6 +147,34 @@ const VideoManager = () => {
     getLocalStream();
   }, [])
 
+  const handleChatMessage = (data, sender, senderSocketId) => {
+    setMessages(prev => [
+      ...prev,
+      { data, sender, senderSocketId }
+    ]);
+
+    // increase unread count only if chat panel is closed
+    if (!showMessageBar) {
+      setunreadCount(prev => prev + 1);
+    }
+  };
+
+  const sendChatMessage = (e) => {
+
+    e.preventDefault();
+
+    if (!chat.trim()) return;
+
+    socketRef.current.emit(
+      "chat-message",
+      chat,
+      meetingusername
+    );
+
+    setchat("");
+  };
+
+
 
   /* -------------------- SOCKET -------------------- */
   const connectSocket = async () => {
@@ -113,14 +182,17 @@ const VideoManager = () => {
 
     socketRef.current = io(SERVER_URL);
 
+    const meetingString = `${SERVER_URL}/${meeting_code}`;
+
     socketRef.current.on("connect", () => {
       socketIdRef.current = socketRef.current.id;
-      socketRef.current.emit("join-call", window.location.href);
+      socketRef.current.emit("join-call", meetingString );
     });
 
     socketRef.current.on("user-joined", handleUserJoined);
     socketRef.current.on("signal", handleSignal);
     socketRef.current.on("user-left", handleUserLeft);
+    socketRef.current.on("chat-message", handleChatMessage);
   };
 
   /* -------------------- USER JOIN -------------------- */
@@ -315,8 +387,50 @@ const VideoManager = () => {
 
 
   const onEndCall = () => {
+    try {
+      /* 1️⃣ Stop local media tracks */
+      if (window.localStream) {
+        window.localStream.getTracks().forEach(track => track.stop());
+        window.localStream = null;
+      }
 
-  }
+      /* 2️⃣ Stop screen sharing if active */
+      if (screenStreamRef.current) {
+        screenStreamRef.current.getTracks().forEach(track => track.stop());
+        screenStreamRef.current = null;
+      }
+
+      /* 3️⃣ Close all peer connections */
+      Object.values(peerConnections.current).forEach(pc => {
+        pc.close();
+      });
+      peerConnections.current = {};
+
+      /* 4️⃣ Clear remote videos */
+      setVideos([]);
+
+      /* 5️⃣ Disconnect socket */
+      if (socketRef.current) {
+        socketRef.current.disconnect();
+        socketRef.current = null;
+      }
+
+      postHistory();
+
+      /* 6️⃣ Reset UI state */
+      setAskForUsername(true);
+      setshowMessageBar(false);
+      setMessages([]);
+      setunreadCount(0);
+
+      /* 7️⃣ Optional: reload or redirect */
+      navigate("/");  // if using react-router
+
+    } catch (err) {
+      console.error("Error ending call:", err);
+    }
+  };
+
 
   const onToggleCamera = () => {
     try {
@@ -334,8 +448,9 @@ const VideoManager = () => {
   }
 
   const onMessageBar = () => {
-    setshowMessageBar(!showMessageBar);
-  }
+    setshowMessageBar(prev => !prev);
+    setunreadCount(0);
+  };
 
   return (
     <div>
@@ -343,15 +458,22 @@ const VideoManager = () => {
         <div>
           <h2>Enter Lobby</h2>
 
-          <TextField
-            label="Username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-          />
+          <form onSubmit={connect}>
+            <TextField
+              label="Username"
+              required
+              value={meetingusername}
+              onChange={(e) => setmeetingusername(e.target.value)}
+            />
 
-          <Button variant="contained" onClick={connect}>
-            Connect
-          </Button>
+            <Button
+              type="submit"
+              variant="contained"
+            >
+              Connect
+            </Button>
+          </form>
+
 
           <video
 
@@ -399,11 +521,29 @@ const VideoManager = () => {
             <div className={`fixed h-screen w-80 bg-gray-100   transform transition-transform duration-300 ${showMessageBar ? 'translate-x-0' : 'translate-x-full'}
  overflow-y-auto top-0 right-0 py-3 px-4`}>
               <h1 className="font-bold text-xl px-2 py-1">Chat window</h1>
-              <div className="h-[80vh] bg-white overflow-y-auto">
-
+              <div className="h-[80vh] bg-white overflow-y-auto px-2 py-1">
+                {messages.map((msg, idx) => (
+                  <div
+                    key={idx}
+                    className={`my-1 p-2 rounded-md max-w-[80%]
+        ${msg.sender === meetingusername
+                        ? "bg-blue-500 text-white ml-auto"
+                        : "bg-gray-200 text-black mr-auto"
+                      }`}
+                  >
+                    <p className="text-xs font-bold">{msg.sender}</p>
+                    <p className="text-sm">{msg.data}</p>
+                  </div>
+                ))}
               </div>
-              <form className="flex mt-2 gap-2.5 px-1 py-1 justify-center items-center" action="">
-                <input className="bg-gray-300 w-96 rounded-md px-1.5 py-1" placeholder="Enter your message..." type="text" name="message" />
+
+              <form className="flex mt-2 gap-2.5 px-1 py-1 justify-center items-center" onSubmit={sendChatMessage}>
+
+                <TextField
+                  label="Enter your chat..."
+                  value={chat}
+                  onChange={(e) => setchat(e.target.value)}
+                />
                 <button className="bg-blue-500 px-2 py-1 text-center rounded-md" type="submit">send</button>
               </form>
             </div>

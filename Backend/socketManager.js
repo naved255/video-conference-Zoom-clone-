@@ -92,6 +92,7 @@ const createSocketConnection = (server) => {
             // Cleanup empty room
             if (connection[roomKey].length === 0) {
                 delete connection[roomKey];
+                delete messages[roomKey];
             }
 
             delete timeOnline[socket.id];
