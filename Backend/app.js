@@ -23,7 +23,7 @@ let io = createSocketConnection(server);
 app.use(session)
 app.use(cors({
     credentials:true,
-    origin: ["http://localhost:5173"]
+    origin: ["http://localhost:5173", "https://video-conference-zoom-clone-psi.vercel.app"]
 }))
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
