@@ -1,12 +1,12 @@
 import React, { useContext, useEffect } from 'react'
-import Navbar from '../Navbar'
-import Hero from './Hero'
-import RightImage from './RightImage'
+import Navbar from '../Navbar.jsx'
+import Hero from './Hero.jsx'
+import RightImage from './RightImage.jsx'
 import { Route, Routes } from 'react-router-dom'
-import History from './History'
-import { GeneralContext } from '../../GeneralProvider'
+import History from './History.jsx'
+import { GeneralContext } from '../../GeneralProvider.jsx'
 import axios from 'axios'
-import API from '../../../config/api'
+import API from '../../../config/api.js'
 
 
 const DashboardPage = () => {

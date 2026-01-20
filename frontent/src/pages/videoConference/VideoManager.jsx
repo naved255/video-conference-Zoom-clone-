@@ -16,7 +16,7 @@ import ChatIcon from "@mui/icons-material/Chat";
 import { useNavigate } from 'react-router-dom'
 import { useParams } from "react-router-dom";
 import axios from 'axios'
-import API from '../../../config/api'
+import API from '../../../config/api.js'
 
 
 

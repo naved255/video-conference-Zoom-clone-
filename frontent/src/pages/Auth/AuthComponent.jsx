@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
-import Login from './Login';
-import Singup from './Singup';
+import Login from './Login.jsx';
+import Singup from './Singup.jsx';
 
 const AuthComponent = () => {
 

@@ -1,7 +1,7 @@
 import React, { useContext, useState } from 'react'
-import API from '../../../config/api';
+import API from '../../../config/api.js';
 import { useNavigate } from 'react-router-dom'
-import { GeneralContext } from '../../GeneralProvider';
+import { GeneralContext } from '../../GeneralProvider.jsx';
 import axios from 'axios'
 
 const Login = () => {

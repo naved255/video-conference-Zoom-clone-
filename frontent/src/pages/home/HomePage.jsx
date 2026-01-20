@@ -1,8 +1,8 @@
 import React, { useContext, useEffect } from 'react'
-import Hero from './Hero'
-import ImageSection from './ImageSection'
-import Navbar from '../Navbar'
-import { GeneralContext } from '../../GeneralProvider'
+import Hero from './Hero.jsx'
+import ImageSection from './ImageSection.jsx'
+import Navbar from '../Navbar.jsx'
+import { GeneralContext } from '../../GeneralProvider.jsx'
 import axios from 'axios'
 import API from '../../../config/api'
 

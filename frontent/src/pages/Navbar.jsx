@@ -1,8 +1,8 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import axios from "axios";
-import API from "../../config/api";
+import API from "../../config/api.js";
 import { useContext } from "react";
-import { GeneralContext } from "../GeneralProvider";
+import { GeneralContext } from "../GeneralProvider.jsx";
 
 const Navbar = ({ title, links = [], color = "white" }) => {
   const navigate = useNavigate();

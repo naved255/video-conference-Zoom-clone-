@@ -1,7 +1,7 @@
 import React from 'react'
-import Navbar from '../Navbar'
-import SideImage from './SideImage'
-import AuthComponent from './AuthComponent'
+import Navbar from '../Navbar.jsx'
+import SideImage from './SideImage.jsx'
+import AuthComponent from './AuthComponent.jsx'
 
 const AuthPage = () => {
   return (
