@@ -19,6 +19,7 @@ const app = express();
 let server = createServer(app);
 let io = createSocketConnection(server);
 
+app.set("trust proxy", 1);
 
 app.use(session)
 app.use(cors({
